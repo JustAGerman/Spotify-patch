@@ -106,53 +106,17 @@ param
 
     [Parameter(HelpMessage = 'Accumulation of track listening history with Goofy.')]
     [string]$idbox_goofy = $null,
-
-    [Parameter(HelpMessage = 'Error log ru string.')]
-    [switch]$err_ru,
     
     [Parameter(HelpMessage = 'Select the desired language to use for installation. Default is the detected system language.')]
     [Alias('l')]
-    [string]$language = 'en'
+    [string]$language
 )
 
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 function Format-LanguageCode {
-    
-    # Normalizes and confirms support of the selected language.
-    [CmdletBinding()]
-    [OutputType([string])]
-    param
-    (
-        [string]$LanguageCode
-    )
-    
-    $supportLanguages = @('en')
-    
-    # Trim the language code down to two letter code.
-    switch -Regex ($LanguageCode) {
-        '^en' {
-            $returnCode = 'en'
-            break
-        }
-        Default {
-            $returnCode = $PSUICulture
-            $long_code = $true
-            break
-        }
-    }
-        
-    # Checking the long language code
-    if ($long_code -and $returnCode -NotIn $supportLanguages) {
-        $returnCode = $returnCode -split "-" | Select-Object -First 1
-    }
-    # Checking the short language code
-    if ($returnCode -NotIn $supportLanguages) {
-        # If the language code is not supported default to English.
-        $returnCode = 'en'
-    }
-    return $returnCode 
+    return 'en'
 }
 
 $spotifyDirectory = Join-Path $env:APPDATA 'Spotify'
@@ -180,8 +144,8 @@ function Get-Link {
     )
 
     switch ($mirror) {
-        $true { return "https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main" + $endlink }
-        default { return "https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main" + $endlink }
+        $true { return "https://spotx-official.github.io/SpotX" + $endlink }
+        default { return "https://raw.githubusercontent.com/SpotX-Official/SpotX/main" + $endlink }
     }
 }
 
@@ -190,7 +154,7 @@ function CallLang($clg) {
     $ProgressPreference = 'SilentlyContinue'
     
     try {
-        $response = (iwr -Uri ("https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main/en.ps1") -UseBasicParsing).Content
+        $response = (iwr -Uri (Get-Link -e "/scripts/installer-lang/$clg.ps1") -UseBasicParsing).Content
         if ($mirror) { $response = [System.Text.Encoding]::UTF8.GetString($response) }
         Invoke-Expression $response
     }
@@ -852,7 +816,7 @@ if ($ch -eq 'n') {
 
 $ch = $null
 
-$webjson = Get -Url (Get-Link -e "/patches.json") -RetrySeconds 5
+$webjson = Get -Url (Get-Link -e "/patches/patches.json") -RetrySeconds 5
         
 if ($webjson -eq $null) { 
     Write-Host
@@ -1651,6 +1615,11 @@ if ($test_js) {
     }
     while ($ch -notmatch '^y$|^n$')
 
+    if ($ch -eq 'y') { 
+        $Url = "https://telegra.ph/SpotX-FAQ-09-19#Can-I-use-SpotX-and-Spicetify-together?"
+        Start-Process $Url
+    }
+
     Write-Host ($lang).StopScript
     Pause
     Exit
@@ -1784,7 +1753,7 @@ if ($test_spa) {
     # Hiding Ad-like sections or turn off podcasts from the homepage
     if ($podcast_off -or $adsections_off -or $canvashome_off) {
 
-        $section = Get -Url (Get-Link -e "/sectionBlock.js")
+        $section = Get -Url (Get-Link -e "/js-helper/sectionBlock.js")
         
         if ($section -ne $null) {
 
@@ -1798,7 +1767,7 @@ if ($test_spa) {
     # goofy History
     if ($urlform_goofy -and $idbox_goofy) {
 
-        $goofy = Get -Url (Get-Link -e "/goofyHistory.js")
+        $goofy = Get -Url (Get-Link -e "/js-helper/goofyHistory.js")
         
         if ($goofy -ne $null) {
 
@@ -1808,8 +1777,8 @@ if ($test_spa) {
 
     # Static color for lyrics
     if ($lyrics_stat) {
-        $rulesContent = Get -Url (Get-Link -e "/rules.css")
-        $colorsContent = Get -Url (Get-Link -e "/colors.css")
+        $rulesContent = Get -Url (Get-Link -e "/css-helper/lyrics-color/rules.css")
+        $colorsContent = Get -Url (Get-Link -e "/css-helper/lyrics-color/colors.css")
 
         $colorsContent = $colorsContent -replace '{{past}}', "$($webjson.others.themelyrics.theme.$lyrics_stat.pasttext)"
         $colorsContent = $colorsContent -replace '{{current}}', "$($webjson.others.themelyrics.theme.$lyrics_stat.current)"
@@ -1902,10 +1871,10 @@ if ($test_spa) {
     extract -counts 'more' -name '*.json' -helper 'MinJson'
 }
 
-# Delete all files except "en" and "ru"
+# Delete all files except "en"
 if ($ru) {
     $patch_lang = "$spotifyDirectory\locales"
-    Remove-Item $patch_lang -Exclude *en*, *ru* -Recurse
+    Remove-Item $patch_lang -Exclude *en* -Recurse
 }
 
 # Create a desktop shortcut
@@ -1963,7 +1932,7 @@ extract -counts 'exe' -helper 'Binary'
 # fix login for old versions
 if ([version]$offline -ge [version]"1.1.87.612" -and [version]$offline -le [version]"1.2.5.1006") {
     $login_spa = Join-Path (Join-Path $env:APPDATA 'Spotify\Apps') 'login.spa'
-    Get -Url (Get-Link -e "/login.spa") -OutputPath $login_spa
+    Get -Url (Get-Link -e "/res/login.spa") -OutputPath $login_spa
 }
 
 # Disable Startup client
