@@ -190,7 +190,7 @@ function CallLang($clg) {
     $ProgressPreference = 'SilentlyContinue'
     
     try {
-        $response = (iwr -Uri (Get-Link -e "/en.ps1") -UseBasicParsing).Content
+        $response = (iwr -Uri ("https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main/en.ps1") -UseBasicParsing).Content
         if ($mirror) { $response = [System.Text.Encoding]::UTF8.GetString($response) }
         Invoke-Expression $response
     }
