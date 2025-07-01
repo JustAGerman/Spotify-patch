@@ -99,7 +99,7 @@ param
             [array] $validValues = @('blue', 'blueberry', 'discord', 'drot', 'default', 'forest', 'fresh', 'github', 'lavender', 'orange', 'postlight', 'pumpkin', 'purple', 'radium', 'relish', 'red', 'sandbar', 'spotify', 'spotify#2', 'strawberry', 'turquoise', 'yellow', 'zing', 'pinkle', 'krux', 'royal', 'oceano')
             $validValues -like "*$wordToComplete*"
         })]
-    [string]$lyrics_stat,
+    [string]$lyrics_stat
 )
 
 # Ignore errors from `Stop-Process`
