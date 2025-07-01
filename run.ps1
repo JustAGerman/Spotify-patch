@@ -792,18 +792,6 @@ if ($no_shortcut) {
 
 $ch = $null
 
-
-# updated Russian translation
-if ($langCode -eq 'ru' -and [version]$offline -ge [version]"1.1.92.644") { 
-    
-    $webjsonru = Get -Url (Get-Link -e "/patches/Augmented%20translation/ru.json")
-
-    if ($webjsonru -ne $null) {
-
-        $ru = $true
-    }
-}
-
 if ($podcasts_off) { 
     Write-Host ($lang).PodcatsOff`n 
     $ch = 'y'
@@ -864,7 +852,7 @@ if ($ch -eq 'n') {
 
 $ch = $null
 
-$webjson = Get -Url (Get-Link -e "/patches/patches.json") -RetrySeconds 5
+$webjson = Get -Url (Get-Link -e "/patches.json") -RetrySeconds 5
         
 if ($webjson -eq $null) { 
     Write-Host
@@ -1796,7 +1784,7 @@ if ($test_spa) {
     # Hiding Ad-like sections or turn off podcasts from the homepage
     if ($podcast_off -or $adsections_off -or $canvashome_off) {
 
-        $section = Get -Url (Get-Link -e "/js-helper/sectionBlock.js")
+        $section = Get -Url (Get-Link -e "/sectionBlock.js")
         
         if ($section -ne $null) {
 
@@ -1810,7 +1798,7 @@ if ($test_spa) {
     # goofy History
     if ($urlform_goofy -and $idbox_goofy) {
 
-        $goofy = Get -Url (Get-Link -e "/js-helper/goofyHistory.js")
+        $goofy = Get -Url (Get-Link -e "/goofyHistory.js")
         
         if ($goofy -ne $null) {
 
@@ -1820,8 +1808,8 @@ if ($test_spa) {
 
     # Static color for lyrics
     if ($lyrics_stat) {
-        $rulesContent = Get -Url (Get-Link -e "/css-helper/lyrics-color/rules.css")
-        $colorsContent = Get -Url (Get-Link -e "/css-helper/lyrics-color/colors.css")
+        $rulesContent = Get -Url (Get-Link -e "/rules.css")
+        $colorsContent = Get -Url (Get-Link -e "/colors.css")
 
         $colorsContent = $colorsContent -replace '{{past}}', "$($webjson.others.themelyrics.theme.$lyrics_stat.pasttext)"
         $colorsContent = $colorsContent -replace '{{current}}', "$($webjson.others.themelyrics.theme.$lyrics_stat.current)"
@@ -1975,7 +1963,7 @@ extract -counts 'exe' -helper 'Binary'
 # fix login for old versions
 if ([version]$offline -ge [version]"1.1.87.612" -and [version]$offline -le [version]"1.2.5.1006") {
     $login_spa = Join-Path (Join-Path $env:APPDATA 'Spotify\Apps') 'login.spa'
-    Get -Url (Get-Link -e "/res/login.spa") -OutputPath $login_spa
+    Get -Url (Get-Link -e "/login.spa") -OutputPath $login_spa
 }
 
 # Disable Startup client
