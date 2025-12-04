@@ -101,8 +101,7 @@ param
     [string]$urlform_goofy = $null,
 
     [Parameter(HelpMessage = 'Accumulation of track listening history with Goofy.')]
-    [string]$idbox_goofy = $null,
-
+    [string]$idbox_goofy = $null
 )
 
 # Ignore errors from `Stop-Process`
