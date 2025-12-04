@@ -163,7 +163,7 @@ function Get-Link {
 $lang = [PSCustomObject]@{
     Welcome         = "
 ╔══════════════════════════════╗
-║ Welcome to SpotX for Windows ║
+║   Welcome to JAGs Spotify    ║
 ╚══════════════════════════════╝"
     Incorrect       = "Oops, an incorrect value,"
     Incorrect2      = "enter again through "
@@ -185,7 +185,7 @@ $lang = [PSCustomObject]@{
     DelOrOver       = "Remove the current version ({0}) or install over it? Y [Remove] / N [Install Over]"
     DelOld          = "Uninstalling old Spotify..."
     NewV            = "Unsupported version of Spotify found"
-    NewV2           = "Your Spotify version ({0}) has not been tested. The stable version for SpotX is {1}"
+    NewV2           = "The stable version for Spotify is {1}"
     NewV3           = "Continue with {0} (errors may occur) ? [Y/N]"
     Recom           = "Install the latest version {0} ? [Y/N]"
     DelNew          = "Uninstalling an untested Spotify..."
@@ -194,15 +194,15 @@ $lang = [PSCustomObject]@{
     PodcatsOff      = "Off Podcasts"
     PodcastsOn      = "On Podcasts"
     PodcatsSelect   = "Hide podcasts, shows, and audiobooks on the homepage ? [Y/N]"
-    DowngradeNote   = "It is recommended to block because there is already a newer version of Spotify"
+    DowngradeNote   = "It is recommended to block because Spotify was downgraded"
     UpdBlock        = "Spotify updates blocked"
     UpdUnblock      = "Spotify updates are not blocked"
     UpdSelect       = "Block Spotify updates ? [Y/N]"
     ModSpoti        = "Patching Spotify..."
     Error           = "Error"
     FileLocBroken   = "Location of Spotify files is broken, uninstall Spotify client and run the script again"
-    Spicetify       = "Spicetify detected, it must be installed after SpotX, open recommended actions in FAQ ? [Y/N]"
-    NoRestore       = "SpotX has already been installed, xpui.bak not found. `nPlease uninstall Spotify client and run Install.bat again"
+    Spicetify       = "Spicetify detected, it must be installed after Spotify, open recommended actions in FAQ ? [Y/N]"
+    NoRestore       = "Spotify has already been installed, xpui backup not found. `nPlease uninstall Spotify and run Install.bat again if problems occur"
     InstallComplete = "installation completed"
     HostInfo        = "Unwanted URLs found in hosts file"
     HostBak         = "Backing up hosts.bak..."
