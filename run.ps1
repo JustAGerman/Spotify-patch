@@ -5,10 +5,6 @@ param
     [Alias("v")]
     [string]$version,
 
-    [Parameter(HelpMessage = "Use github.io mirror instead of raw.githubusercontent.")]
-    [Alias("m")]
-    [switch]$mirror,
-
     [Parameter(HelpMessage = "Developer mode activation.")]
     [Alias("dev")]
     [switch]$devtools,
@@ -107,53 +103,11 @@ param
     [Parameter(HelpMessage = 'Accumulation of track listening history with Goofy.')]
     [string]$idbox_goofy = $null,
 
-    [Parameter(HelpMessage = 'Error log ru string.')]
-    [switch]$err_ru,
-    
-    [Parameter(HelpMessage = 'Select the desired language to use for installation. Default is the detected system language.')]
-    [Alias('l')]
-    [string]$language
 )
 
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
-function Format-LanguageCode {
-    
-    # Normalizes and confirms support of the selected language.
-    [CmdletBinding()]
-    [OutputType([string])]
-    param
-    (
-        [string]$LanguageCode
-    )
-    
-    $supportLanguages = @(
-        'en'
-    )
-    switch -Regex ($LanguageCode) {
-        '^en' {
-            $returnCode = 'en'
-            break
-        }
-        Default {
-            $returnCode = $PSUICulture
-            $long_code = $true
-            break
-        }
-    }
-        
-    # Checking the long language code
-    if ($long_code -and $returnCode -NotIn $supportLanguages) {
-        $returnCode = $returnCode -split "-" | Select-Object -First 1
-    }
-    # Checking the short language code
-    if ($returnCode -NotIn $supportLanguages) {
-        # If the language code is not supported default to English.
-        $returnCode = 'en'
-    }
-    return $returnCode 
-}
 
 $spotifyDirectory = Join-Path $env:APPDATA 'Spotify'
 $spotifyDirectory2 = Join-Path $env:LOCALAPPDATA 'Spotify'
@@ -203,32 +157,60 @@ function Get-Link {
         [string]$endlink
     )
 
-    switch ($mirror) {
-        $true { return "https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main" + $endlink }
-        default { return "https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main" + $endlink }
-    }
+    return "https://raw.githubusercontent.com/JustAGerman/Spotify-patch/refs/heads/main" + $endlink
 }
 
-function CallLang($clg) {
-
-    $ProgressPreference = 'SilentlyContinue'
-    
-    try {
-        $response = (iwr -Uri (Get-Link -e "/en.ps1") -UseBasicParsing).Content
-        if ($mirror) { $response = [System.Text.Encoding]::UTF8.GetString($response) }
-        Invoke-Expression $response
-    }
-    catch {
-        Write-Host "Error loading $clg language"
-        Pause
-        Exit
-    }
+# Language strings (English only)
+$lang = [PSCustomObject]@{
+    Welcome         = "
+╔══════════════════════════════╗
+║ Welcome to SpotX for Windows ║
+╚══════════════════════════════╝"
+    Incorrect       = "Oops, an incorrect value,"
+    Incorrect2      = "enter again through "
+    Download        = "Error downloading"
+    Download2       = "Will re-request in 5 seconds..."
+    Download3       = "Error again"
+    Download4       = "Check your network settings and run the installation again"
+    Download5       = "Downloading Spotify"
+    StopScript      = "Script is stopped"
+    MsSpoti         = "The Microsoft Store version of Spotify has been detected which is not supported"
+    MsSpoti2        = "Uninstall Spotify Microsoft Store edition ? [Y/N]"
+    MsSpoti3        = "Automatically uninstalling Spotify MS..."
+    MsSpoti4        = "Uninstalling Spotify MS..."
+    Prem            = "Modification for premium account..."
+    OldV            = "Found outdated version of Spotify"
+    OldV2           = "Your Spotify version ({0}) is outdated, the current latest version is — {1}"
+    OldV3           = "Want to update ? [Y/N]"
+    AutoUpd         = "Automatic update to the recommended version"
+    DelOrOver       = "Remove the current version ({0}) or install over it? Y [Remove] / N [Install Over]"
+    DelOld          = "Uninstalling old Spotify..."
+    NewV            = "Unsupported version of Spotify found"
+    NewV2           = "Your Spotify version ({0}) has not been tested. The stable version for SpotX is {1}"
+    NewV3           = "Continue with {0} (errors may occur) ? [Y/N]"
+    Recom           = "Install the latest version {0} ? [Y/N]"
+    DelNew          = "Uninstalling an untested Spotify..."
+    DownSpoti       = "Downloading and installing Spotify"
+    DownSpoti2      = "Please wait..."
+    PodcatsOff      = "Off Podcasts"
+    PodcastsOn      = "On Podcasts"
+    PodcatsSelect   = "Hide podcasts, shows, and audiobooks on the homepage ? [Y/N]"
+    DowngradeNote   = "It is recommended to block because there is already a newer version of Spotify"
+    UpdBlock        = "Spotify updates blocked"
+    UpdUnblock      = "Spotify updates are not blocked"
+    UpdSelect       = "Block Spotify updates ? [Y/N]"
+    ModSpoti        = "Patching Spotify..."
+    Error           = "Error"
+    FileLocBroken   = "Location of Spotify files is broken, uninstall Spotify client and run the script again"
+    Spicetify       = "Spicetify detected, it must be installed after SpotX, open recommended actions in FAQ ? [Y/N]"
+    NoRestore       = "SpotX has already been installed, xpui.bak not found. `nPlease uninstall Spotify client and run Install.bat again"
+    InstallComplete = "installation completed"
+    HostInfo        = "Unwanted URLs found in hosts file"
+    HostBak         = "Backing up hosts.bak..."
+    HostDel         = "Trying to remove unwanted URLs from the original hosts file..."
+    HostError       = "Something went wrong while editing the hosts file, edit it manually or run the script as administrator"
+    PressAnyKey     = "Press any key to exit..."
 }
-
-# Set language code for script.
-$langCode = Format-LanguageCode -LanguageCode $Language
-
-$lang = CallLang -clg $langCode
 
 Write-Host ($lang).Welcome
 Write-Host
@@ -265,6 +247,7 @@ if ($version) {
 
 $old_os = $win7 -or $win8 -or $win8_1
 
+# latest tested version for Win 7-8.1 
 $last_win7_full = "1.2.5.1006.g22820f93-1078"
 
 if (!($version -and $version -match $match_v)) {
@@ -272,7 +255,8 @@ if (!($version -and $version -match $match_v)) {
         $onlineFull = $last_win7_full
     }
     else {  
-        $onlineFull = "1.2.78.409.g6aead1f8-948"
+        # latest tested version for Win 10-12 
+        $onlineFull = "1.2.78.418.gaeeb5ebd-1067"
     }
 }
 else {
@@ -813,6 +797,7 @@ if ($no_shortcut) {
 
 $ch = $null
 
+
 if ($podcasts_off) { 
     Write-Host ($lang).PodcatsOff`n 
     $ch = 'y'
@@ -1234,7 +1219,7 @@ function Helper($paramname) {
             }
             else { Remove-Json -j $VarJs -p "goofyhistory" }
             
-            if (!($ru)) { Remove-Json -j $VarJs -p "offrujs" }
+            Remove-Json -j $VarJs -p "offrujs"
 
             if (!($premium) -or ($cache_limit)) {
                 if (!($premium)) { 
@@ -1272,9 +1257,9 @@ function Helper($paramname) {
         if ( $json.$PSItem.version.to ) { $to = [version]$json.$PSItem.version.to -ge [version]$offline_patch } else { $to = $true }
         if ( $json.$PSItem.version.fr ) { $fr = [version]$json.$PSItem.version.fr -le [version]$offline_patch } else { $fr = $false }
         
-        $checkVer = $fr -and $to; $translate = $paramname -eq "RuTranslate"
+        $checkVer = $fr -and $to
 
-        if ($checkVer -or $translate) {
+        if ($checkVer) {
 
             if ($json.$PSItem.match.Count -gt 1) {
 
@@ -1302,10 +1287,8 @@ function Helper($paramname) {
                     $paramdata = $paramdata -replace $json.$PSItem.match, $json.$PSItem.replace 
                 }
                 else { 
-                    if (!($translate) -or $err_ru) {
-                        Write-Host $novariable -ForegroundColor red -NoNewline 
-                        Write-Host "$name$PSItem"'in'$n
-                    }
+                    Write-Host $novariable -ForegroundColor red -NoNewline 
+                    Write-Host "$name$PSItem"'in'$n
                 }
             }   
         }
@@ -1901,6 +1884,11 @@ if ($test_js) {
     }
     while ($ch -notmatch '^y$|^n$')
 
+    if ($ch -eq 'y') { 
+        $Url = "https://telegra.ph/SpotX-FAQ-09-19#Can-I-use-SpotX-and-Spicetify-together?"
+        Start-Process $Url
+    }
+
     Stop-Script
 }  
 
@@ -1987,7 +1975,7 @@ if ($test_spa) {
         $spotify_binary = $spotifyExecutable
     }
 
-    If ($patched_by_spotx -match 'patched') {
+    If ($patched_by_spotx -match 'patched by spotx') {
         $zip.Dispose()    
 
         if ($test_bak_spa) {
@@ -2006,7 +1994,7 @@ if ($test_spa) {
                 }
                 else {
                     $binary_exe_bak = [System.IO.Path]::GetFileName($exe_bak)
-                    Write-Warning ("Backup copy {0} not found. Please reinstall Spotify and run again" -f $binary_exe_bak)
+                    Write-Warning ("Backup copy {0} not found. Please reinstall Spotify and run SpotX again" -f $binary_exe_bak)
                     Pause
                     Exit
                 }
@@ -2017,7 +2005,7 @@ if ($test_spa) {
                 }
                 else {
                     $binary_chrome_elf_bak = [System.IO.Path]::GetFileName($chrome_elf_bak)
-                    Write-Warning ("Backup copy {0} not found. Please reinstall Spotify and run again" -f $binary_chrome_elf_bak)
+                    Write-Warning ("Backup copy {0} not found. Please reinstall Spotify and run SpotX again" -f $binary_chrome_elf_bak)
                     Pause
                     Exit
                 }
@@ -2026,6 +2014,7 @@ if ($test_spa) {
         }
         else {
             Write-Host ($lang).NoRestore`n
+            Pause
             Exit
         }
 
@@ -2039,19 +2028,17 @@ if ($test_spa) {
 
     }
 
-    # Remove all languages except En and Ru from xpui.spa
-    if ($ru) {
-        $null = [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression')
-        $stream = New-Object IO.FileStream($xpui_spa_patch, [IO.FileMode]::Open)
-        $mode = [IO.Compression.ZipArchiveMode]::Update
-        $zip_xpui = New-Object IO.Compression.ZipArchive($stream, $mode)
+    # Remove all languages except En from xpui.spa
+    $null = [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression')
+    $stream = New-Object IO.FileStream($xpui_spa_patch, [IO.FileMode]::Open)
+    $mode = [IO.Compression.ZipArchiveMode]::Update
+    $zip_xpui = New-Object IO.Compression.ZipArchive($stream, $mode)
 
-        ($zip_xpui.Entries | Where-Object { $_.FullName -match "i18n" -and $_.FullName -inotmatch "(ru|en.json|longest)" }) | foreach { $_.Delete() }
+    ($zip_xpui.Entries | Where-Object { $_.FullName -match "i18n" -and $_.FullName -inotmatch "(en.json|longest)" }) | foreach { $_.Delete() }
 
-        $zip_xpui.Dispose()
-        $stream.Close()
-        $stream.Dispose()
-    }
+    $zip_xpui.Dispose()
+    $stream.Close()
+    $stream.Dispose()
 
     # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
     if (!($premium)) {
@@ -2090,7 +2077,7 @@ if ($test_spa) {
     # goofy History
     if ($urlform_goofy -and $idbox_goofy) {
 
-        $goofy = Get -Url (Get-Link -e "/js-helper/goofyHistory.js")
+        $goofy = Get -Url (Get-Link -e "/goofyHistory.js")
         
         if ($goofy -ne $null) {
 
@@ -2186,18 +2173,14 @@ if ($test_spa) {
     # blank.html minification
     extract -counts 'one' -method 'zip' -name 'blank.html' -helper 'HtmlBlank'
     
-    if ($ru) {
-        # Additional translation of the ru.json file
-        extract -counts 'more' -name '*ru.json' -helper 'RuTranslate'
-    }
     # Minification of all *.json
     extract -counts 'more' -name '*.json' -helper 'MinJson'
 }
 
 # Delete all files except "en"
-if ($ru) {
-    $patch_lang = "$spotifyDirectory\locales"
-    Remove-Item $patch_lang -Exclude *en* -Recurse
+$patch_lang = "$spotifyDirectory\locales"
+if (Test-Path $patch_lang) {
+    Remove-Item $patch_lang -Exclude *en* -Recurse -ErrorAction SilentlyContinue
 }
 
 # Create a desktop shortcut
@@ -2254,7 +2237,7 @@ if ($regex1 -and $regex2 -and $regex3 -and $regex4 -and $regex5) {
 
 if (-not (Test-Path -LiteralPath $spotify_binary_bak)) {
     $name_binary = [System.IO.Path]::GetFileName($spotify_binary_bak)
-    Write-Warning ("Backup copy {0} not found. Please reinstall Spotify and run again" -f $name_binary)
+    Write-Warning ("Backup copy {0} not found. Please reinstall Spotify and run SpotX again" -f $name_binary)
     Pause
     Exit
 }
@@ -2273,7 +2256,7 @@ extract -counts 'exe' -helper 'Binary'
 # fix login for old versions
 if ([version]$offline -ge [version]"1.1.87.612" -and [version]$offline -le [version]"1.2.5.1006") {
     $login_spa = Join-Path (Join-Path $env:APPDATA 'Spotify\Apps') 'login.spa'
-    Get -Url (Get-Link -e "/res/login.spa") -OutputPath $login_spa
+    Get -Url (Get-Link -e "/login.spa") -OutputPath $login_spa
 }
 
 # Disable Startup client
